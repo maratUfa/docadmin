@@ -1,0 +1,46 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /docadmin                                       Application.index
+GET     /                                               Application.index
+
+# Application
+POST    /docadmin/update/{typeParam}/{idParam}          Application.updateAttribute
+POST    /docadmin/update/{typeParam}/{idParam}/         Application.updateAttribute
+
+# Documents
+# ~~~~
+GET     /docadmin/attachments/{id}                      Documents.documentAttachments
+GET     /docadmin/attachments/{id}/                     Documents.documentAttachments
+GET     /docadmin/view/{documentId}                     Documents.documentView
+GET     /docadmin/view/{documentId}/                    Documents.documentView
+POST    /docadmin/register/{typeParam}/{idParam}        Documents.registerDocument
+POST    /docadmin/register/{typeParam}/{idParam}/       Documents.registerDocument
+GET     /docadmin/reports/{idParam}                     Documents.documentReports
+GET     /docadmin/reports/{idParam}/                    Documents.documentReports
+GET     /docadmin/tasks/{idParam}                       Documents.documentTasks
+GET     /docadmin/tasks/{idParam}/                      Documents.documentTasks
+GET     /docadmin/missions/{idParam}                    Documents.documentMissions
+GET     /docadmin/missions/{idParam}/                   Documents.documentMissions
+GET     /docadmin/abortworkflow/{idParam}               Documents.abortWorkflow
+GET     /docadmin/abortworkflow/{idParam}/              Documents.abortWorkflow
+GET     /docadmin/cancelchekout/{idParam}               Documents.cancelCheckout
+GET     /docadmin/cancelchekout/{idParam}/              Documents.cancelCheckout
+
+# Users
+# ~~~~
+GET     /docadmin/viewuser/{userid}                     Users.userView                     
+GET     /docadmin/viewuser/{userid}/                    Users.userView
+GET     /docadmin/usertasks/{userId}                    Users.userTasks
+GET     /docadmin/usertasks/{userId}/                   Users.userTasks
+
+# Ignore favicon requests
+GET     /favicon.ico                            404
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
+
+# Catch all
+*       /{controller}/{action}                  {controller}.{action}

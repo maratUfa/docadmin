@@ -2,7 +2,8 @@
 /dmcl
 /nbproject
 /tmp
-/conf
+/conf/documentum.conf
+/conf/dmcl.ini
 play_docadmin.iml
 play_docadmin.ipr
 play_docadmin.iws
