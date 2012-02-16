@@ -239,7 +239,7 @@ public class Users extends Controller {
         DFC dfc = new DFC();
         List<String> groups = new ArrayList<String>();
         IDfCollection col = dfc.query("select group_name from dm_group where lower(group_name) like '"
-                + filter.toLowerCase() + "%' ENABLE (RETURN_TOP 10)");
+                + filter.toLowerCase() + "%' order by group_name ENABLE (RETURN_TOP 10)");
         while(col.next()){
             groups.add(col.getString("group_name"));
         }
@@ -248,6 +248,22 @@ public class Users extends Controller {
         dfc.disconnect();
 
         renderJSON(groups);
+    }
+    
+    public static void getPositionList(String filter) throws DfException{
+        
+        DFC dfc = new DFC();
+        List<Map<String, Object>> positions = new ArrayList<Map<String, Object>>();
+        IDfCollection col = dfc.query("select r_object_id, object_name from kc_position where lower(object_name) like '" +
+                filter.toLowerCase() + "%' order by object_name ENABLE (RETURN_TOP 10)");
+        while(col.next()){
+            positions.add(dfc.col2Map(col));
+        }
+        col.close();
+        
+        dfc.disconnect();
+
+        renderJSON(positions);
     }
 
     

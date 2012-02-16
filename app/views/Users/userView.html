@@ -149,13 +149,48 @@
                     $("#dialog-select-" + attrName).dialog("open");
                 });
 
+                $("button.btn-filter-search").button({icons:{primary:"ui-icon-search"}, text: false});
+
+                $("#dialog-select-" + attrName + " > .dialog-select-filter > input").keyup(function(event){
+                    if(event.which == 13){
+                        $(this).parent().children("button.btn-filter-search").click();
+                    }
+                });
+
             });
 
 
 
+            $("#dialog-select-ka_position_id").dialog("option", "open", function(){
+                setPositionList("");
+            });
+
+            $("#dialog-select-ka_position_id > .dialog-select-filter > button.btn-filter-search").click(function(){
+                console.log(1);
+                var filter = $(this).parent().children("input").val();
+                console.log(filter)
+                setPositionList(filter);
+            });
 
             
         });
+
+        function setPositionList(filter){
+            var url = "@{Users.getPositionList()}";
+            $.get(url, {filter:filter}).success(function(data){
+                $("#dialog-select-ka_position_id").find("div.dialog-select-values > ol.dialog-select-values-list").html('');
+                for(var i in data){
+                    var posId = data[i]['r_object_id'];
+                    var posName = data[i]['object_name'];
+                    $("#dialog-select-ka_position_id")
+                            .find("div.dialog-select-values > ol.dialog-select-values-list")
+                            .append("<li><span>" + posName + "</span></li>");
+                }
+                $("#dialog-select-ka_position_id")
+                        .find("div.dialog-select-values > ol.dialog-select-values-list")
+                        .selectable();
+            });
+        }
     </script>
 </head>
 <body>
