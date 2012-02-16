@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    #{ifnot ajax}
+        #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+        #{stylesheet 'documents.css' /}
+        #{script 'jquery-1.6.2.min.js' /}
+        #{script 'jquery-ui-1.8.16.custom.min.js' /}
+        #{script 'zclip/jquery.zclip.min.js' /}
+    #{/ifnot}
+    <style type="text/css">
+        .task-table-user-name{
+            width: 10%;
+            /*background-color: #999999;*/
+        }
+        .task-table-task-subject{
+            width: 20%;
+            /*background-color: #C6E746;*/
+        }
+        .task-table-task-name{
+            width: 12%;
+            /*background-color: #cccccc;*/
+        }
+        .task-table-event{
+            width: 12%;
+            /*background-color: #e6820E;*/
+        }
+        .task-table-router{
+            width: 10%;
+            /*background-color:#fcefa1;*/
+        }
+        .task-table-workitem{
+            width: 10%;
+            /*background-color: #ff7f50;*/
+        }
+        .task-table-date-sent{
+            width: 12%;
+            /*background-color: #00ced1;*/
+        }
+        .task-table-buttons{
+            width: 8%;
+            /*background-color: #ff1493;*/
+        }
+
+        .task-table > .task-table-row > .columns-row{
+            margin: 0;
+            border-left-color: #aaaaaa;
+            border-left-width: 1px;
+            border-left-style: solid;
+        }
+
+        .task-table > #task-table-head > .columns-row{
+            border-bottom-color: #aaaaaa;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+        }
+
+        .task-table > .task-table-row-head > .columns-row > span{
+            font-weight: bold;
+        }
+
+        .task-table > .task-table-row{
+            width: 100%;
+        }
+    </style>
+
+  <title></title>
+</head>
+<body>
+    <div class="task-table">
+        <div class="task-table-row task-table-row-head">
+            <div class="columns-row columns-row task-table-task-subject"><span>Subject:</span></div>
+            <div class="columns-row task-table-task-name"><span>Taskname:</span></div>
+            <div class="columns-row task-table-event"><span>Event:</span></div>
+            <div class="columns-row task-table-router"><span>Router:</span></div>
+            <div class="columns-row task-table-workitem"><span>Workitem:</span></div>
+            <div class="columns-row task-table-date-sent"><span>Date:</span></div>
+            <div class="columns-row task-table-buttons"><span>Additional:</span></div>
+        </div>
+        #{list userTasks, as: 'task'}
+            <div class="task-table-row">
+                <div class="columns-row task-table-task-subject">
+                    <span class="cuttable">
+                        #{if task.task_subject}
+                            ${task.task_subject}
+                        #{/if}
+                        #{else }
+                            &nbsp;
+                        #{/else}
+                    </span>
+                </div>
+                <div class="columns-row task-table-task-name"><span>${task.task_name}</span></div>
+                <div class="columns-row task-table-event"><span class="cuttable">${task.event}</span></div>
+                <div class="columns-row task-table-router"><span>${task.router_id}</span></div>
+                <div class="columns-row task-table-workitem"><span>${task.item_id}</span></div>
+                <div class="columns-row task-table-date-sent"><span>${task.date_sent}</span></div>
+                <div class="columns-row task-table-buttons"><span>Two buttons</span></div>
+            </div>
+        #{/list}
+
+    </div>
+</body>
+</html>

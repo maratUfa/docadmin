@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    #{ifnot ajax}        
+        #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+        #{stylesheet 'documents.css' /}
+        #{script 'jquery-1.6.2.min.js' /} 
+        #{script 'jquery-ui-1.8.16.custom.min.js' /}
+        #{script 'zclip/jquery.zclip.min.js' /}
+    #{/ifnot}
+    <style type="text/css">
+        
+        .report-table-id{
+            width: 10%;
+            /*background-color: #5E740B;*/
+        }
+
+        .report-table-date{
+            width: 10%;
+            /*background-color: #F6921E;*/
+        }
+
+        .report-table-final{
+            width: 8%;
+            /*background-color: #d9d6c4;*/
+        }
+
+        .report-table-text{
+            width: 62%;
+            /*background-color: #ffe4c4;*/
+        }
+
+        .report-table-percent{
+            width: 3%;
+            /*background-color: #ffcaca;*/
+        }
+
+        #report-table > .report-table-row > .columns-row{
+            margin: 0;
+            border-left-color: #aaaaaa;
+            border-left-width: 1px;
+            border-left-style: solid;
+        }
+
+        #report-table > .report-table-row-head > .columns-row{
+            border-bottom-color: #aaaaaa;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+        }
+
+        #report-table > .report-table-row-head > .columns-row > span{
+            font-weight: bold;
+        }
+
+        #report-table > .report-table-row{
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="report-table">
+        <div class="report-table-row report-table-row-head">
+            <div class="columns-row report-table-id"><span>Id:</span></div>
+            <div class="columns-row report-table-date"><span>Дата:</span></div>
+            <div class="columns-row report-table-final"><span>Тип:</span></div>
+            <div class="columns-row report-table-text"><span>Текст:</span></div>
+            <div class="columns-row report-table-percent"><span>%:</span></div>
+        </div>        
+        #{list reports, as: 'report'}
+            <div class="report-table-row">
+                <div class="columns-row report-table-id"><span>${ report.r_object_id }</span></div>
+                <div class="columns-row report-table-date"><span>${ report.r_creation_date }</span></div>
+                <div class="columns-row report-table-final"><span>#{if report.ka_is_final }Промежуточный#{/if}#{else}Финальный#{/else}</span></div>
+                <div class="columns-row report-table-text"><span class="cuttable">${ report.ka_text }</span></div>
+                <div class="columns-row report-table-percent"><span>${ report.ka_completion_percent }</span></div>
+            </div>
+        #{/list}
+    </div>
+</body>
+</html>

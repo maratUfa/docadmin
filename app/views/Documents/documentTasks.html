@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #{ifnot ajax}        
+            #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+            #{stylesheet 'documents.css' /}
+            #{script 'jquery-1.6.2.min.js' /} 
+            #{script 'jquery-ui-1.8.16.custom.min.js' /}
+            #{script 'zclip/jquery.zclip.min.js' /}
+        #{/ifnot}
+        <style type="text/css">
+
+            .task-table-user-name{
+                width: 10%;
+                /*background-color: #999999;*/
+            }
+            .task-table-task-subject{
+                width: 20%;
+                /*background-color: #C6E746;*/
+            }
+            .task-table-task-name{
+                width: 12%;
+                /*background-color: #cccccc;*/
+            }
+            .task-table-event{
+                width: 12%;
+                /*background-color: #e6820E;*/
+            }
+            .task-table-router{
+                width: 9%;
+                /*background-color:#fcefa1;*/
+            }
+            .task-table-workitem{
+                width: 9%;
+                /*background-color: #ff7f50;*/
+            }
+            .task-table-date-sent{
+                width: 10%;
+                /*background-color: #00ced1;*/
+            }
+            .task-table-buttons{
+                width: 8%;
+                /*background-color: #ff1493;*/
+            }
+
+            #task-table > .task-table-row > .columns-row{
+                margin: 0;
+                border-left-color: #aaaaaa;
+                border-left-width: 1px;
+                border-left-style: solid;
+            }
+
+            #task-table > #task-table-head > .columns-row{
+                border-bottom-color: #aaaaaa;
+                border-bottom-width: 1px;
+                border-bottom-style: solid;
+            }
+
+            #task-table > #task-table-head > .columns-row > span{
+                font-weight: bold;
+            }
+
+            #task-table > .task-table-row{
+                width: 100%;
+            }
+
+            #task-table > #task_table_options > div{
+                margin-bottom: 15px;
+                display: inline-block;
+            }
+
+            /*input#document_tasks_do_not_include_closed_tasks{*/
+             div#div_document_tasks_do_not_include_closed_tasks{
+                width: 100%;
+            }
+
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $(".btn-refresh").parent().button({icons:{primary:"ui-icon-refresh"}});
+                $("#refresh_tasks_btn").click(refresh_tasks);
+                linkOnClickRefreshBtn();
+            });
+
+            function refresh_tasks(){
+                $("#task-table").find(".task-table-row:not(#task-table-head)").remove();
+                $.get('@{ Documents.documentTasks(docAttributes.r_object_id.toString())}',{tstamp: new Date().getTime(),
+                    do_not_include_closed_tasks: $("#document_tasks_do_not_include_closed_tasks")[0].checked},
+                    set_document_tasks
+
+                );
+            }
+
+            function linkOnClickRefreshBtn(){
+                $(".btn-flag").parent().click(function(){
+                    workflow_id = $(this).parent().parent().find(".task-table-router>span").text();
+                    //alert(workflow_id);
+                    $("#confirm_dialog").dialog({
+                        open: function(event, ui){
+                                var wf = $("#confirm_dialog").dialog("option","workflow_id")
+                                $("#confirm_dialog_message").text("Really abort workflow " + wf + " ?");
+                            },
+                        autoOpen: false,
+                        width: 300,
+                        buttons:{
+                            "Yes": function(){
+                                var wf = $("#confirm_dialog").dialog("option","workflow_id");
+                                var abortwf = #{jsAction @Documents.abortWorkflow(':wfid') /};
+
+                                $.get(abortwf({wfid: wf}), {},
+                                        function(result){
+                                            if(result=="true"){
+                                                $('#confirm_dialog').dialog("close");
+                                                refresh_tasks();
+                                            }
+                                });
+                                
+                                //alert(workflow_id);
+                            },
+                            "No": function(){
+                                $(this).dialog("close");
+                            }
+                        }
+                    });
+                    $("#confirm_dialog").dialog('option','workflow_id',workflow_id);
+                    $("#confirm_dialog").dialog("open");
+                    return false;
+                });
+
+                $(".btn-trash").parent().button({icons:{primary:"ui-icon-trash"}});
+                $(".btn-flag").parent().button({icons:{primary:"ui-icon-flag"}});
+                $(".btn-mail-open").parent().button({icons:{primary:"ui-icon-mail-open"}});
+                $(".btn-mail-closed").parent().button({icons:{primary:"ui-icon-mail-closed"}});
+
+                $(".only-icon").parent().addClass("ui-button-text-only-icon");
+            }
+
+
+            function set_document_tasks(data){
+                //$("#document_tasks_table > tbody").html(data);
+                //link_confirm_to_stop_task();
+                for(var i=0; i<$(data).length; i++){
+                    if($(data).get(i).id == "task-table"){
+                        $("#task-table > #task-table-head").after($($(data).get(i)).find('.task-table-row:not(#task-table-head)'));
+                    }
+                }
+
+                linkOnClickRefreshBtn();
+
+            }
+        </script>
+    </head>
+    <body>
+
+        <div id="task-table">
+            <div id="task_table_options">
+                <div id="div_document_tasks_do_not_include_closed_tasks">
+                    <input type='checkbox' id='document_tasks_do_not_include_closed_tasks' checked>Не включать завершенные задачи</input>
+                </div>
+                <div >
+                    <a id="refresh_tasks_btn"><span class="btn-refresh"></span>Refresh</a>
+                </div>
+            </div>
+            <div id="task-table-head" class="task-table-row">
+                <div class="columns-row task-table-user-name"><span>Username:</span></div>
+                <div class="columns-row task-table-task-subject"><span>Subject:</span></div>
+                <div class="columns-row task-table-task-name"><span>Taskname:</span></div>
+                <div class="columns-row task-table-event"><span>Event:</span></div>
+                <div class="columns-row task-table-router"><span>Router:</span></div>
+                <div class="columns-row task-table-workitem"><span>Workitem:</span></div>
+                <div class="columns-row task-table-date-sent"><span>Date:</span></div>
+                <div class="columns-row task-table-buttons"><span>Additional:</span></div>
+            </div>
+            #{list tasks, as: 'task'}
+                <div class="task-table-row">
+                    <div class="columns-row task-table-user-name"><span class="cuttable">${ task.name }</span></div>
+                    <div class="columns-row task-table-task-subject"><span class="cuttable">${ task.task_subject }</span></div>
+                    <div class="columns-row task-table-task-name"><span class="cuttable">${ task.task_name }</span></div>
+                    <div class="columns-row task-table-event"><span class="cuttable">${ task.event }</span></div>
+                    <div class="columns-row task-table-router"><span>${ task.router_id }</span></div>
+                    <div class="columns-row task-table-workitem"><span>${ task.item_id }</span></div>
+                    <div class="columns-row task-table-date-sent"><span class="cuttable">${ task.date_sent }</span></div>
+                    <div class="columns-row task-table-buttons">
+                        <div >
+                            #{if task.read_flag }
+                                <span class="btn-mail-open only-icon"></span>
+                            #{/if}
+                            #{else}
+                                <span class="btn-mail-closed only-icon"></span>
+                            #{/else}
+                        </div>
+                        <div >
+                            #{if task.delete_flag }
+                                <span class="btn-trash only-icon"></span>
+                            #{/if}
+                            #{else}
+                                <span class="btn-flag only-icon"></span>
+                            #{/else}
+                        </div>
+                    </div>
+                </div>
+            #{/list}
+            </div>
+
+        </div>
+        <div id="confirm_dialog" title = "Confirm">
+            <p id="confirm_dialog_message"></p>
+        </div>
+
+
+    </body>
+</html>

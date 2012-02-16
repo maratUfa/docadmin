@@ -1,0 +1,112 @@
+.ui-icon {
+    vertical-align: middle;
+    display: inline-block;
+    /*left: 0px !important;*/
+}
+
+.button {
+    cursor: pointer;
+}
+
+.button>a{
+    padding-right: 5px;
+}
+
+.columns>div>span{
+    display: inline-block;
+}
+.columns-row>span{
+    display: inline-block;
+}
+
+.columns>div>div{
+    display: inline-block;
+}
+.columns-row>div{
+    display: inline-block;
+}
+
+.columns>div{
+    vertical-align: top;
+    display: inline-block;
+    padding: 5px 5px 5px 5px;
+    margin: 0 5px 5px 5px;
+}
+
+.columns-row{
+    vertical-align: top;
+    display: inline-block;
+    padding: 5px 5px 5px 5px;
+    margin: 0 5px 5px 5px;
+}
+
+body{
+    font-size: 8pt;
+    font-family: Verdana,Arial,sans-serif;
+}
+
+ul.ul-vertical-list{
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 0 -8px;
+}
+
+ul.ul-vertical-list>li{
+    padding: 5px 5px 5px 5px;
+}
+
+
+span.cuttable{
+    /*-moz-binding:url("ellipsisxul.xml#ellipsis");
+    -o-text-overflow:ellipsis;*/
+    display:block;
+    overflow:hidden;
+    white-space:nowrap;
+    width:100%;
+    text-overflow:ellipsis;
+
+}
+
+.ui-button-text{
+    padding-bottom: 0px !important;
+    padding-top: 0px !important;
+
+    /*
+    padding-left: 16px !important;
+    padding-right: 5px !important;
+    */
+}
+
+.ui-button-text-only-icon{
+    /*
+    padding-right: 0px !important;
+    padding-left: 0px !important;
+    */
+    min-height: 16px;
+    min-width: 16px;
+}
+
+.ui-button-icon-only{
+    width: 18px !important;
+    height: 18px !important;
+
+}
+.ui-widget{
+    font-size: 8pt !important;
+}
+
+div.hover > a.ui-button{
+    border: 1px solid #999999; background: #dadada url(images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #212121;
+}
+
+div.hover > a.ui-button > .ui-icon{
+    background-image: url(images/ui-icons_454545_256x240.png);
+}
+
+div.active > a.ui-button{
+    border: 1px solid #aaaaaa; background: #ffffff url(images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x; font-weight: normal; color: #212121;
+}
+
+div.active > a.ui-button > .ui-icon{
+    background-image: url(images/ui-icons_454545_256x240.png);
+}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #{ifnot ajax}        
+            #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+            #{stylesheet 'documents.css' /}
+            #{script 'jquery-1.6.2.min.js' /} 
+            #{script 'jquery-ui-1.8.16.custom.min.js' /}
+            #{script 'zclip/jquery.zclip.min.js' /}
+        #{/ifnot}
+        <style type="text/css">
+
+            .miss-table-id{
+                width: 10%;
+                /*background-color: #2b81af;*/
+            }
+
+            .miss-table-date{
+                width: 10%;
+                /*background-color: #5E740B;*/
+            }
+
+            .miss-table-author{
+                width: 10%;
+                /*background-color: #999999;*/
+            }
+
+            .miss-table-controller{
+                width: 10%;
+                /*background-color: #e6820E;*/
+            }
+
+            .miss-table-performer{
+                width: 10%;
+                /*background-color: #EE5757;*/
+            }
+
+            .miss-table-text{
+                width: 20%;
+                /*background-color: #f5deb3;*/
+            }
+
+            .miss-table-due-date{
+                width: 10%;
+                /*background-color: #ffcaca;*/
+            }
+
+            .miss-table-state{
+                width: 10%;
+                /*background-color: #00ced1;*/
+            }
+
+            .miss-table > .miss-table-row > .columns-row{
+                margin: 0;
+                border-left-color: #aaaaaa;
+                border-left-width: 1px;
+                border-left-style: solid;
+            }
+
+            .miss-table > .miss-table-row-head > .columns-row{
+                border-bottom-color: #aaaaaa;
+                border-bottom-width: 1px;
+                border-bottom-style: solid;
+            }
+
+            .miss-table > .miss-table-row-head > .columns-row > span{
+                font-weight: bold;
+            }
+
+            .miss-table > .miss-table-row{
+                width: 100%;
+            }
+
+            .miss-table > .miss-table-row:not(.miss-table-row-head) > .columns-row{
+                min-height: 26px;
+            }
+
+            .miss-table > p{
+                padding: 5px;
+                margin: 0 0 10px 0;
+            }
+
+            #miss-table-options > div{
+                margin-bottom: 15px;
+                display: inline-block;
+            }
+
+            #div_do_not_include_closed_missions{
+                width: 100%;
+            }
+
+
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("#refresh_missions_btn").click(function(){
+                    $(".miss-table").remove();
+                    $.get('@{ Documents.documentMissions(docAttributes.r_object_id)}',{tstamp: new Date().getTime(),
+                        do_not_include_closed_missions: $("#do_not_include_closed_missions")[0].checked},
+                        function(data){
+                            for(var i=$(data).length-1; i>=0; i--){
+                               //alert($(data).get(i).class);
+
+                               if($(data).get(i).className == "miss-table"){
+                                    $("#miss-table-options").after($($(data).get(i)));
+                               }
+
+                            }
+                        }
+
+                    );
+                });
+                $("#refresh_missions_btn").button({icons:{primary:"ui-icon-refresh"}});
+            });
+        </script>
+    </head>
+    <body>
+        <div id="miss-table-options">
+            <div id="div_do_not_include_closed_missions">
+                <input type='checkbox' id='do_not_include_closed_missions' checked>Не включать завершенные поручения</input>
+            </div>
+            <div >
+                <a id="refresh_missions_btn"><span class="btn-refresh-missions"></span>Refresh</a>
+            </div>
+        </div>
+        <div class="miss-table">
+            <p>Поручения:</p>
+            <div class="miss-table-row miss-table-row-head">
+                <div class="columns-row miss-table-id"><span>Id:</span></div>
+                <div class="columns-row miss-table-date"><span>Date:</span></div>
+                <div class="columns-row miss-table-author"><span>Author:</span></div>
+                <div class="columns-row miss-table-controller"><span>Controller:</span></div>
+                <div class="columns-row miss-table-performer"><span>Performer:</span></div>
+                <div class="columns-row miss-table-text"><span>Text:</span></div>
+                <div class="columns-row miss-table-due-date"><span>Due date:</span></div>
+                <div class="columns-row miss-table-state"><span>State:</span></div>
+            </div>
+            #{list missionList, as: 'mission'}
+                <div class="miss-table-row">
+                    <div class="columns-row miss-table-id"><a href="@{ Documents.documentView(mission.object_id)}" ><span>${ mission.object_id }</span></a></div>
+                    <div class="columns-row miss-table-date"><span>${ mission.date }</span></div>
+                    <div class="columns-row miss-table-author"><span>${ mission.author.short_name } (${ mission.author.user_name })</span></div>
+                    <div class="columns-row miss-table-controller">
+                        <span>
+                            #{if mission.on_control }
+                                ${ mission.controller.short_name } (${ mission.controller.user_name })
+                            #{/if}
+                        </span>
+                    </div>
+                    <div class="columns-row miss-table-performer"><span>${ mission.performer.short_name } (${ mission.performer.user_name })</span></div>
+                    <div class="columns-row miss-table-text"><span class="cuttable">${ mission.text }</span></div>
+                    <div class="columns-row miss-table-due-date"><span>${ mission.due_date }</span></div>
+                    <div class="columns-row miss-table-state"><span>${ mission.state }</span></div>
+                </div>
+            #{/list}
+        </div>
+        #{if intAgreeList.size() > 0 }
+            <div class="miss-table">
+                <p>Внутренние согласования:</p>
+                <div class="miss-table-row miss-table-row-head">
+                    <div class="columns-row miss-table-id"><span>Id:</span></div>
+                    <div class="columns-row miss-table-date"><span>Date:</span></div>
+                    <div class="columns-row miss-table-author"><span>Author:</span></div>
+                    <div class="columns-row miss-table-controller"><span>Controller:</span></div>
+                    <div class="columns-row miss-table-performer"><span>Performer:</span></div>
+                    <div class="columns-row miss-table-text"><span>Text:</span></div>
+                    <div class="columns-row miss-table-due-date"><span>Due date:</span></div>
+                    <div class="columns-row miss-table-state"><span>State:</span></div>
+                </div>
+                #{list intAgreeList, as: 'mission'}
+                    <div class="miss-table-row">
+                        <div class="columns-row miss-table-id"><a href="@{ Documents.documentView(mission.object_id)}" ><span>${ mission.object_id }</span></a></div>
+                        <div class="columns-row miss-table-date"><span>${ mission.date }</span></div>
+                        <div class="columns-row miss-table-author"><span>${ mission.author.short_name } (${ mission.author.user_name })</span></div>
+                        <div class="columns-row miss-table-controller">
+                            <span>
+                                #{if mission.on_control }
+                                    ${ mission.controller.short_name } (${ mission.controller.user_name })
+                                #{/if}
+                            </span>
+                        </div>
+                        <div class="columns-row miss-table-performer"><span>${ mission.performer.short_name } (${ mission.performer.user_name })</span></div>
+                        <div class="columns-row miss-table-text"><span class="cuttable">${ mission.text }</span></div>
+                        <div class="columns-row miss-table-due-date"><span>${ mission.due_date }</span></div>
+                        <div class="columns-row miss-table-state"><span>${ mission.state }</span></div>
+                    </div>
+                #{/list}
+            </div>
+        #{/if}
+        #{if transferDateList.size() > 0 }
+            <div class="miss-table">
+                <p>Запросы переноса контрольного срока:</p>
+                <div class="miss-table-row miss-table-row-head">
+                    <div class="columns-row miss-table-id"><span>Id:</span></div>
+                    <div class="columns-row miss-table-date"><span>Date:</span></div>
+                    <div class="columns-row miss-table-author"><span>Author:</span></div>
+                    <div class="columns-row miss-table-controller"><span>Controller:</span></div>
+                    <div class="columns-row miss-table-performer"><span>Performer:</span></div>
+                    <div class="columns-row miss-table-text"><span>Text:</span></div>
+                    <div class="columns-row miss-table-due-date"><span>Due date:</span></div>
+                    <div class="columns-row miss-table-state"><span>State:</span></div>
+                </div>
+                #{list transferDateList, as: 'mission'}
+                    <div class="miss-table-row">
+                        <div class="columns-row miss-table-id"><a href="@{ Documents.documentView(mission.object_id)}" ><span>${ mission.object_id }</span></a></div>
+                        <div class="columns-row miss-table-date"><span>${ mission.date }</span></div>
+                        <div class="columns-row miss-table-author"><span>${ mission.author.short_name } (${ mission.author.user_name })</span></div>
+                        <div class="columns-row miss-table-controller">
+                            <span>
+                                #{if mission.on_control }
+                                    ${ mission.controller.short_name } (${ mission.controller.user_name })
+                                #{/if}
+                            </span>
+                        </div>
+                        <div class="columns-row miss-table-performer"><span>${ mission.performer.short_name } (${ mission.performer.user_name })</span></div>
+                        <div class="columns-row miss-table-text"><span class="cuttable">${ mission.text }</span></div>
+                        <div class="columns-row miss-table-due-date"><span>${ mission.due_date }</span></div>
+                        <div class="columns-row miss-table-state"><span>${ mission.state }</span></div>
+                    </div>
+                #{/list}
+            </div>
+        #{/if}
+        #{if grantReqList.size() > 0 }
+            <div class="miss-table">
+                <p>Запросы прав:</p>
+                <div class="miss-table-row miss-table-row-head">
+                    <div class="columns-row miss-table-id"><span>Id:</span></div>
+                    <div class="columns-row miss-table-date"><span>Date:</span></div>
+                    <div class="columns-row miss-table-author"><span>Author:</span></div>
+                    <div class="columns-row miss-table-controller"><span>Controller:</span></div>
+                    <div class="columns-row miss-table-performer"><span>Performer:</span></div>
+                    <div class="columns-row miss-table-text"><span>Text:</span></div>
+                    <div class="columns-row miss-table-due-date"><span>Due date:</span></div>
+                    <div class="columns-row miss-table-state"><span>State:</span></div>
+                </div>
+                #{list grantReqList.size() > 0 }
+                    <div class="miss-table-row">
+                        <div class="columns-row miss-table-id"><a href="@{ Documents.documentView(mission.object_id)}" ><span>${ mission.object_id }</span></a></div>
+                        <div class="columns-row miss-table-date"><span>${ mission.date }</span></div>
+                        <div class="columns-row miss-table-author"><span>${ mission.author.short_name } (${ mission.author.user_name })</span></div>
+                        <div class="columns-row miss-table-controller">
+                            <span>
+                                #{if mission.on_control }
+                                    ${ mission.controller.short_name } (${ mission.controller.user_name })
+                                #{/if}
+                            </span>
+                        </div>
+                        <div class="columns-row miss-table-performer"><span>${ mission.performer.short_name } (${ mission.performer.user_name })</span></div>
+                        <div class="columns-row miss-table-text"><span class="cuttable">${ mission.text }</span></div>
+                        <div class="columns-row miss-table-due-date"><span>${ mission.due_date }</span></div>
+                        <div class="columns-row miss-table-state"><span>${ mission.state }</span></div>
+                    </div>
+                #{/list}
+            </div>
+        #{/if}
+    </body>
+</html>

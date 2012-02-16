@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    #{ifnot ajax}
+        #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+        #{stylesheet 'documents.css' /}
+        #{script 'jquery-1.6.2.min.js' /}
+        #{script 'jquery-ui-1.8.16.custom.min.js' /}
+        #{script 'zclip/jquery.zclip.min.js' /}
+    #{/ifnot}
+    <title></title>
+    <style type="text/css">
+        .groups-table-actions{
+            margin: 5px;
+        }
+
+        .groups-table-row{
+            margin-bottom: 5px;
+            margin-left: 5px;
+        }
+
+        .btn-remove-group{
+            margin-right: 10px;
+        }
+
+        #btn-group-search{
+            top: 4px;
+        }
+
+        .dialog-add-group-list-row{
+            width: 100%;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #dialog-add-group-filter{
+            margin-bottom: 5px;
+        }
+
+        #dialog-add-group-list > ol > .ui-selecting {
+            background: #FECA40;
+        }
+
+        #dialog-add-group-list > ol > .ui-selected {
+            background: #F39814;
+            color: white; }
+
+        #dialog-add-group-list > ol {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        #dialog-add-group-list > ol > li {
+            margin: 3px;
+            padding: 0.4em;
+            cursor: pointer;
+            /*
+            font-size: 1.4em;
+            height: 18px;
+            */
+        }
+
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            $("#dialog-add-group").dialog({
+                autoOpen: false,
+                height: 360,
+                buttons: {
+                    "Выбрать":function(){
+                        var uid = "${userId}";
+                        var url = "@{Users.addUserToGroup()}";
+                        var total = 0;
+                        var complete = 0;
+
+                        $("#dialog-add-group-list > ol > li.ui-selected").each(function(){
+                            total += 1;
+                            $.post(url, {
+                                userId: uid,
+                                groupName: $(this).text()
+                            }).success(function(data){
+                                complete += 1;
+                                if(complete == total){
+                                    reloadPage();
+                                }
+                            });
+                        });
+
+                        $(this).dialog("close");
+                    },
+                    "Закрыть":function(){
+                        $(this).dialog("close");
+                    }
+                },
+                open: function(){
+                    var url = "@{Users.getGroupList()}";
+                    $("#dialog-add-group-list > ol").html("");
+                    $.get(url , {filter: ""} ).success(setGroupList);
+                }
+            });
+
+            $("#btn-add-group").button({
+                icons: {
+                    primary: "ui-icon-plusthick"
+                }
+            }).click(function(){
+                        $("#dialog-add-group").dialog("open");
+                    }
+            );
+
+            $("#btn-group-search").click(function(){
+                $("#dialog-add-group-list > ol").html("");
+                var filter = $("#input-group-filter").val();
+                var url = "@{Users.getGroupList()}";
+                $.get(url, {filter: filter}).success(setGroupList);
+            });
+
+
+            $(".btn-remove-group").button({
+                icons: {
+                    primary: "ui-icon-minusthick"
+                }, text: false
+            }).click(removeUserFromGroup);
+
+            $("#btn-group-search").button({
+                icons: {
+                    primary: "ui-icon-search"
+                },
+                text: false
+            });
+
+            $("#input-group-filter").keyup(function(event){
+                if(event.which == 13){
+                    $("#btn-group-search").click();
+                }
+            });
+        });
+
+        function setGroupList(data){
+            for(var i in data){
+                $("#dialog-add-group-list > ol").append($("<li><span>" + data[i] + "</span></li>"));
+            }
+            $("#dialog-add-group-list > ol").selectable();
+        }
+
+        function removeUserFromGroup(){
+            var gname =  $(this).parent().children("span").text();
+            var url = "@{Users.removeUserFromGroup()}";
+            $.post(url, {userId: "${userId}", groupName: gname}).success(reloadPage);
+        }
+
+        function reloadPage(){
+            $.get("@{ Users.userGroups(userId)}").success(function(data){
+                $(".groups-table-rows").html('');
+                $(".groups-table-rows").append($(data).find(".groups-table-rows"));
+                $(".btn-remove-group").button({
+                    icons: {
+                        primary: "ui-icon-minusthick"
+                    }, text: false
+                }).click(removeUserFromGroup);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id='dialog-add-group' title='Выбор группы'>
+        <div id="dialog-add-group-filter">
+            <input type="text" id="input-group-filter" /><button id="btn-group-search"></button>
+        </div>
+        <hr />
+        <div id="dialog-add-group-list">
+            <ol>
+
+            </ol>
+        </div>
+    </div>
+    <div class="groups-table">
+        <div class="groups-table-actions">
+            <button id="btn-add-group">Добавить группу</button>
+        </div>
+        <div class="groups-table-rows">
+            #{list groups, as: 'group'}
+                <div class="groups-table-row">
+                    <button class="btn-remove-group">Remove</button><span>${ group }</span>
+                </div>
+            #{/list}
+        </div>
+    </div>
+</body>
+</html>

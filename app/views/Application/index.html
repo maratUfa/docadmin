@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+    #{stylesheet 'documents.css' /}
+    #{script 'jquery-1.6.2.min.js' /} 
+    #{script 'jquery-ui-1.8.16.custom.min.js' /}
+    #{script 'zclip/jquery.zclip.min.js' /}
+    <title>DA Helper</title>
+    <style type="text/css">
+        span.cuttable{
+            /*-moz-binding:url("ellipsisxul.xml#ellipsis");
+            -o-text-overflow:ellipsis;*/
+            display:block;
+            overflow:hidden;
+            white-space:nowrap;
+            width:100%;
+            text-overflow:ellipsis;
+        }
+
+
+        body {
+            /*background: white url("images/ui-bg_fine-grain_15_ffffff_60x60.png") 50% 50% repeat;*/
+            background-color: #dadada;
+        }
+
+        div#search-tabs {
+            margin: 30px 30px 30px 30px;
+            font-size: 8pt;
+        }
+
+        .error{
+            color: red;
+        }
+
+        .fields-row{
+            width: 100%;
+            display: inline-block;
+        }
+
+        .fields-row:first-child{
+            margin-top: 10px;
+        }
+
+        .fields-row > .label{
+            width: 15%;
+        }
+
+        .fields-row > .fields{
+            display: inline-block;
+            padding: 5px 5px 5px 5px;
+            margin: 0 5px 0px 5px;
+            vertical-align: top;
+        }
+
+        .searh-result{
+            margin-top: 10px;
+        }
+
+        .fields-id{
+            width: 10%;
+            /*background-color: #366097;*/
+        }
+
+        .fields-name{
+            width: 40%;
+            /*background-color: #C6E746;*/
+        }
+
+        .fields-reg-number{
+            width: 10%;
+            /*background-color: #aaaaaa;*/
+        }
+
+        .fields-reg-date{
+            width: 11%;
+            /*background-color: #ffcaca;*/
+        }
+
+        .fields-create-date{
+            width: 11%;
+            /*background-color: #fef1ec;*/
+        }
+
+        .fields-owner{
+            width: 10%;
+            /*background-color: #7fffd4;*/
+        }
+
+        .searh-result > .fields-row > .fields{
+            margin: 0;
+            border-left-color: #aaaaaa;
+            border-left-width: 1px;
+            border-left-style: solid;
+        }
+
+        .searh-result > .fields-row-head > .fields{
+            border-bottom-color: #aaaaaa;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+        }
+
+        .searh-result > .fields-row-head > .fields > span{
+            font-weight: bold;
+        }
+
+        .searh-result > .fields-row{
+            width: 100%;
+        }
+
+        .ui-widget{
+            font-size: 8pt;
+        }
+
+        .fields-user-id{
+            width: 10%;
+        }
+
+        .fields-user-name{
+            width: 15%;
+        }
+
+        .fields-user-surname{
+            width: 18%;
+        }
+
+        .fields-user-firstname{
+            width: 18%;
+        }
+
+        .fields-user-middlename{
+            width: 18%;
+        }
+
+        .fields-user-state{
+            width: 10%;
+        }
+
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            $("div#search-tabs").tabs({
+                ajaxOptions: {
+                    error: function( xhr, status, index, anchor ) {
+                        $( anchor.hash ).html(
+                            "Не возможно загрузить вкладку");
+                    },
+                    cache: false
+                }
+            });
+            
+            #{if currentTab }
+                $("div#search-tabs").tabs("option","selected", ${currentTab});            
+            #{/if}
+            //$.datepicker.setDefaults( $.datepicker.regional[ "ru" ] );
+            $( ".date > input" ).datepicker({
+                regional: "ru",
+                showOn: "button",
+                buttonImage: "@{'public/images/calendar.gif'}",
+                buttonImageOnly: true
+            });
+
+
+            /*$( ".date > input" ).datepicker( "option",
+				$.datepicker.regional[ "ru" ] );
+            */
+        });
+    </script>
+</head>
+<body>
+    <div id="search-tabs">
+        <ul>
+            <li><a href="#documents">Документы</a></li>
+            <li><a href="#users">Пользователи</a></li>
+            <li><a href="#groups">Группы</a></li>
+            <li><a href="#acl">ACL</a></li>
+        </ul>
+
+        <div id="documents" class="search-form">
+            #{form @Documents.searchDocument()}
+                <div class="fields-row">
+                    <div class="fields label"><span>Идентификатор</span></div>
+                    <div class="fields input"><input maxlength="16" id="id_documentId" type="text" name="documentId" value="${ flash.get('documentId')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Название документа</span></div>
+                    <div class="fields input"><input maxlength="100" id="idName" type="text" name="documentName" value="${flash.get('documentName')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Регистрационный номер</span></div>
+                    <div class="fields input"><input maxlength="17" id="id_regNumber" type="text" name="regNumber" value="${flash.get('regNumber')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Дата регистрации</span></div>
+                    <div class="fields input date"><input id="id_regDate" type="text" name="regDate" value="${flash.get('regDate')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Дата создания</span></div>
+                    <div class="fields input date"><input id="id_creationDate" type="text" name="creationDate" value="${flash.get('creationDate')}"></div>
+                </div>
+                <input type="hidden" name="tab" value="0"/>
+                <input type="submit" name="submit_document" value="Найти"/>
+            #{/form}
+            
+            #{if currentTab == 0}
+                #{ifErrors}
+                   #{errors}
+                       <p class="error">${error}</p>
+                   #{/errors}
+
+                #{/ifErrors}            
+            #{/if}            
+
+            
+            #{if docList}
+
+                <div class="searh-result">
+                    <div class="fields-row fields-row-head">
+                        <div class="fields fields-id"><span>Id:</span></div>
+                        <div class="fields fields-name"><span>Name:</span></div>
+                        <div class="fields fields-reg-number"><span>Reg. number:</span></div>
+                        <div class="fields fields-reg-date"><span>Reg. date:</span></div>
+                        <div class="fields fields-create-date"><span>Creation date:</span></div>
+                        <div class="fields fields-owner"><span>Owner:</span></div>
+                    </div>
+                    
+                    #{list items:docList, as: 'doc'}
+                        <div class="fields-row">
+                            <div class="fields fields-id"><a href="@{Documents.documentView(doc.r_object_id)}">${ doc.r_object_id }</a></div>
+                            <div class="fields fields-name"><span class="cuttable">${ doc.object_name }</span></div>
+                            <div class="fields fields-reg-number"><span>${ doc.ka_registration_number }</span></div>
+                            <div class="fields fields-reg-date"><span>${ doc.ka_registration_date }</span></div>
+                            <div class="fields fields-create-date"><span>${ doc.r_creation_date }</span></div>
+                            <div class="fields fields-owner"><span>${ doc.owner_name }</span></div>
+                        </div>
+                    #{/list}
+                    
+                </div>
+            #{/if}
+            
+
+        </div>
+        <div id="users">            
+            #{form @Users.searchUser()}
+                <div class="fields-row">
+                    <div class="fields label"><span>Surname</span></div>
+                    <div class="fields input"><input maxlength="200" id="id_userSurname" type="text" name="userSurname" value="${flash.get('userSurname')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Firstname</span></div>
+                    <div class="fields input"><input maxlength="200" id="id_userFirstname" type="text" name="userFirstname" value="${flash.get('userFirstname')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Middlename</span></div>
+                    <div class="fields input"><input maxlength="64" id="id_userMiddlename" type="text" name="userMiddlename" value="${flash.get('userMiddlename')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>User name</span></div>
+                    <div class="fields input"><input maxlength="32" id="id_userName" type="text" name="userName" value="${flash.get('userName')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>User Id</span></div>
+                    <div class="fields input"><input maxlength="16" id="id_userId" type="text" name="userId" value="${flash.get('userId')}"></div>
+                </div>
+                <div class="fields-row">
+                    <div class="fields label"><span>Orgposition Id</span></div>
+                    <div class="fields input"><input maxlength="16" id="id_orgPosId" type="text" name="orgPosId" value="${flash.get('orgPosId')}"></div>
+                </div>
+                <input type="hidden" name="tab" value="1">
+                <input type="submit" value="Найти">
+            #{/form}
+            
+            #{if userList }
+
+                <div class="searh-result">
+                    <div class="fields-row fields-row-head">
+                        <div class="fields fields-user-id"><span>Id:</span></div>
+                        <div class="fields fields-user-name"><span>Username:</span></div>
+                        <div class="fields fields-user-surname"><span>Фамилия:</span></div>
+                        <div class="fields fields-user-firstname"><span>Имя:</span></div>
+                        <div class="fields fields-user-middlename"><span>Отчество:</span></div>
+                        <div class="fields fields-user-state"><span>Состояние:</span></div>
+                    </div>
+                    
+                    #{list items:userList, as:'user'}
+                        <div class="fields-row">                            
+                            <div class="fields fields-user-id"><a href="@{ Users.userView(user.r_object_id)}">${ user.r_object_id }</a></div>
+                            <div class="fields fields-user-name"><span>${ user.user_name }</span></div>
+                            <div class="fields fields-user-surname"><span>${ user.ka_surname }</span></div>
+                            <div class="fields fields-user-firstname"><span>${ user.ka_firstname }</span></div>
+                            <div class="fields fields-user-middlename"><span>${ user.ka_middlename }</span></div>
+                            <div class="fields fields-user-state">
+                                <span>
+                                    #{if user.user_state == 0 }
+                                    Активный
+                                    #{/if}
+                                    #{if user.user_state == 1 }
+                                    Неактивный
+                                    #{/if}
+                                    #{if user.user_state == 2 }
+                                    Заблокированный
+                                    #{/if}
+                                    #{if user.user_state == 3 }
+                                    Заблокированный и неактивный
+                                    #{/if}
+                                    #{if user.user_state > 3 }
+                                    Неопределенный
+                                    #{/if}
+                                </span>
+                            </div>
+                        </div>
+                    #{/list}                    
+                </div>
+            #{/if}
+
+        </div>
+        <div id="groups"></div>
+        <div id="acl"></div>
+    </div>
+</body>
+</html>

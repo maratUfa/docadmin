@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    #{stylesheet 'documents.css' /}
+    #{stylesheet 'jquery-ui-1.8.16.custom.css' /}
+    #{script 'jquery-1.6.2.min.js' /} 
+    #{script 'jquery-ui-1.8.16.custom.min.js' /}
+    #{script 'zclip/jquery.zclip.min.js' /}
+    <title></title>
+    <style type="text/css">
+        body {
+            /*background: white url("images/ui-bg_fine-grain_15_ffffff_60x60.png") 50% 50% repeat;*/
+            background-color: #dadada;
+        }
+
+        div#tabs {
+            margin: 30px 30px 30px 30px;
+        }
+
+        .column-1{
+            width: 15%;
+        }
+
+        .column-2{
+            width: 80%;
+        }
+
+        form>input{
+            width: 100%;
+        }
+
+        .lock-section{
+            color: red;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+        $(function(){
+            $(".btn-copy").parent().button({icons:{primary:"ui-icon-copy"}});
+            $(".btn-edit").parent().button({icons:{primary:"ui-icon-pencil"}});
+            $(".btn-register").parent().button({icons:{primary:"ui-icon-arrowrefresh-1-w"}});
+            $(".btn-unlock").parent().button({icons:{primary:"ui-icon-unlocked"}});
+
+
+            $("div#tabs").tabs({
+                ajaxOptions: {
+                    error: function( xhr, status, index, anchor ) {
+                        $( anchor.hash ).html(
+                            "Не возможно загрузить вкладку");
+                    },
+                    cache: false,
+                    success: function(data, textStatus, jqXHR){
+                        //console.log($('.btn-copy-realpath').parent().length)
+                        $('.btn-copy-realpath').parent().each(function(){
+                            var txt = $(this).parent().parent().parent().find('.att-table-real-path > span').text();
+                            //console.log($(this).parent().parent().parent().find('.att-table-real-path > span').text());
+                            $(this).zclip({
+                                path: "@{'public/javascripts/zclip/ZeroClipboard.swf'}",
+                                copy: txt,
+                                afterCopy: function(){
+                                    //console.log(txt);
+                                }
+                            })
+                        });
+                    }
+                }
+            });
+
+            link_copyfunc_objectname();
+            link_copyfunc_regnumber();
+            link_copyfunc_aclname();
+            link_copyfunc_object_id();
+
+            $('#object_name_edit_dialog').dialog({
+                open: function(event, ui){
+                    $("#input_form_object_name").val($("#document_object_name").text());
+                },
+                autoOpen: false,
+                width: 600,
+                buttons: {
+                    "Ok": function() {
+                        $.post("@{ Application.updateAttribute(docAttributes.r_object_type, docAttributes.r_object_id.toString())}",
+                            {
+                                object_name : $("#input_form_object_name").val()
+                            },
+                            function(data){
+                                $("#document_object_name").text(data["object_name"]);
+                                $('#object_name_edit_dialog').dialog("close");
+                                link_copyfunc_objectname();
+                            }
+                        )
+
+                    },
+                    "Cancel": function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            $('#ka_registration_number_edit_dialog').dialog({
+                open: function(event, ui){
+                    $("#input_form_ka_registration_number").val($("#document_ka_registration_number").text());
+                },
+                autoOpen: false,
+                width: 200,
+                buttons: {
+                    "Ok": function() {
+                        $.post("@{ Application.updateAttribute(docAttributes.r_object_type, docAttributes.r_object_id.toString())}",
+                            {
+                                ka_registration_number: $('#input_form_ka_registration_number').val()
+                            },
+                            function(data){
+                                $('#document_ka_registration_number').text(data['ka_registration_number']);
+                                $('#ka_registration_number_edit_dialog').dialog('close');
+                                link_copyfunc_regnumber();
+                            }
+                        )
+                    },
+                    "Cancel": function() {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            $('#ka_state_name_ru_edit_dialog').dialog({
+                open: function(event, ui){
+                    $("#input_form_ka_state_name_ru").val($("#document_ka_state_name_ru").text());
+                },
+                autoOpen: false,
+                width: 200,
+                buttons: {
+                    "Ok": function() {
+                        $.post("@{ Application.updateAttribute(docAttributes.r_object_type, docAttributes.r_object_id.toString())}",
+                            {
+                                ka_state_name_ru : $("#input_form_ka_state_name_ru").val()
+                            },
+                            function(data){
+                                $("#document_ka_state_name_ru").text(data["ka_state_name_ru"]);
+                                $('#ka_state_name_ru_edit_dialog').dialog("close");
+
+                            }
+                        )
+
+                    },
+                    "Cancel": function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            $('#r_current_state_edit_dialog').dialog({
+                open: function(event, ui){
+                    $("#input_form_r_current_state").val($("#document_r_current_state").text());
+                },
+                autoOpen: false,
+                width: 200,
+                buttons: {
+                    "Ok": function() {
+                        $.post("@{ Application.updateAttribute(docAttributes.r_object_type, docAttributes.r_object_id.toString())}",
+                            {
+                                r_current_state : $("#input_form_r_current_state").val()
+                            },
+                            function(data){
+                                $("#document_r_current_state").text(data["r_current_state"]);
+                                $('#r_current_state_edit_dialog').dialog("close");
+
+                            }
+                        )
+
+                    },
+                    "Cancel": function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            $('#object_name_edit_link').click(function(){
+                $('#object_name_edit_dialog').dialog('open');
+                return false;
+            });
+
+            $('#ka_registration_number_edit_link').click(function(){
+                $('#ka_registration_number_edit_dialog').dialog('open');
+                return false;
+            });
+
+            $('#ka_state_name_ru_edit_link').click(function(){
+                $('#ka_state_name_ru_edit_dialog').dialog('open');
+                return false;
+            });
+
+            $('#r_current_state_edit_link').click(function(){
+                $('#r_current_state_edit_dialog').dialog('open');
+                return false;
+            });
+
+            $("#ka_registration_number_refresh_link").click(function(){
+                $.post('@{ Documents.registerDocument(docAttributes.r_object_type, docAttributes.r_object_id)}',                
+                    {
+                    },
+                    function(data){
+                        $("#document_ka_registration_number").text(data["ka_registration_number"]);
+                        $("#document_ka_registration_date").text(data["ka_registration_date"]);
+                        link_copyfunc_regnumber();
+                });
+            });
+
+            $("#cancel_checkout_button").click(function(){
+                 $.get("/docadmin/cancelcheckout/{{ docAttributes.r_object_id.toString }}",{tstamp: new Date().getTime()},
+                    function(){
+                        $(".lock-section").html('');
+                    }
+                  );
+            });
+
+            $("#document_r_object_id").parent().click(function(){
+                window.open("http://docserver.sys.bis:8080/webtop/action/properties?objectId={{ docAttributes.r_object_id }}");
+            });
+
+            $('ul.ui-tabs-nav').append(
+                    $('<li class="ui-state-default ui-corner-top" style="float: right;"><a href="@{ Application.index() }">Поиск</a></li>')
+                            .hover(
+                                function(){
+                                    $(this).addClass("ui-state-hover");
+                                },
+                                function(){
+                                    $(this).removeClass("ui-state-hover");
+                                }
+                    )
+            );
+
+        });
+
+        function link_copyfunc_objectname(){
+            /*
+            $('#btn_copy_objectname').click(function(){
+                text = $("span#document_object_name").text();
+                if (window.clipboardData && clipboardData.setData) {
+                    clipboardData.setData('text', text);
+                }
+            });
+            */
+
+            $('#btn_copy_objectname').zclip({
+                path: "@{'public/javascripts/zclip/ZeroClipboard.swf'}",
+                copy: $("span#document_object_name").text(),
+                afterCopy: function(){},
+                clickAfter: false,
+                setCSSEffects: true
+            });
+        }
+
+        function link_copyfunc_regnumber(){
+
+            /*
+            $('#btn_copy_regnumber').click(function(){
+                text = $("span#document_ka_registration_number").text();
+                if (window.clipboardData && clipboardData.setData) {
+                    clipboardData.setData('text', text);
+                }
+
+            });
+            */
+
+            $('#btn_copy_regnumber').zclip({
+                path: "@{'public/javascripts/zclip/ZeroClipboard.swf'}",
+                copy: $("span#document_ka_registration_number").text(),
+                afterCopy: function(){},
+                clickAfter: false,
+                setCSSEffects: true
+            });
+
+        }
+        
+        function link_copyfunc_aclname(){
+            /*
+            $('#btn_copy_aclname').click(function(){
+                text = $("span#document_acl_name").text();
+                if (window.clipboardData && clipboardData.setData) {
+                    clipboardData.setData('text', text);
+                }
+            });
+            */
+
+            $('#btn_copy_aclname').zclip({
+                path: "@{'public/javascripts/zclip/ZeroClipboard.swf'}",
+                copy: $("span#document_acl_name").text(),
+                afterCopy: function(){},
+                clickAfter: false,
+                setCSSEffects: true
+            });
+
+
+
+        }
+
+        function link_copyfunc_object_id(){
+            /*
+            $('#btn_copy_object_id').click(function(){
+                text = $("span#document_r_object_id").text();
+                if (window.clipboardData && clipboardData.setData) {
+                    clipboardData.setData('text', text);
+                }
+            });
+            */
+
+            $('#btn_copy_object_id').zclip({
+                //path: '/docadmin/media/js/zclip/ZeroClipboard.swf',
+                path: "@{'public/javascripts/zclip/ZeroClipboard.swf'}",
+                copy: $("span#document_r_object_id").text(),
+                afterCopy: function(){},
+                clickAfter: false,
+                setCSSEffects: true
+            });
+        }
+
+    </script>
+
+
+</head>
+<body>
+    <div id="tabs">
+        <ul>
+            <li><a href="#basic">Основное</a></li>
+            <li><a href="@{ Documents.documentAttachments(docAttributes.r_object_id.toString()) }">Вложения</a></li>
+            <li><a href="@{ Documents.documentTasks(docAttributes.r_object_id.toString()) }">Задачи</a></li>            
+            #{if docAttributes.r_object_type in docAttributes.available_documents__}
+                <li><a href="@{ Documents.documentMissions(docAttributes.r_object_id.toString())}">Поручения</a></li>
+            #{/if}
+            #{if docAttributes.r_object_type in docAttributes.doctypes_with_reports__}
+                <li><a href="@{ Documents.documentReports(docAttributes.r_object_id.toString()) }">Отчеты</a></li>                
+            #{/if}
+        </ul>
+        <div id="basic">
+            <div class="columns">
+                <div class="column-1">Идентификатор:</div>
+                <div class="column-2">
+                    <a><span id="document_r_object_id">${ docAttributes.r_object_id }</span></a>
+                    <div id="btn_copy_object_id">
+                        <a><span class="btn-copy"></span>Copy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Имя:</div>
+                <div class="column-2">
+                    <span id="document_object_name">${ docAttributes.object_name }</span>
+                    <div id="btn_copy_objectname" >
+                        <a><span class="btn-copy"></span>Copy</a>
+                    </div>
+                    <div >
+                        <a id="object_name_edit_link"><span class="btn-edit"></span>Edit</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Тип документа:</div>
+                <div class="column-2">${ docAttributes.ka_doc_type } (${ docAttributes.r_object_type })</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Вид документа:</div>
+                <div class="column-2">${ docAttributes.ka_doc_kind }</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Рег номер:</div>
+                <div class="column-2">
+                    <span id="document_ka_registration_number">${ docAttributes.ka_registration_number }</span>
+                    <div id="btn_copy_regnumber">
+                        <a><span class="btn-copy"></span>Copy</a>
+                    </div>
+                    <div >
+                        <a id="ka_registration_number_refresh_link"><span class="btn-register"></span>Register</a>
+                    </div>
+                    <div >
+                        <a id="ka_registration_number_edit_link"><span class="btn-edit"></span>Edit</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Рег дата:</div>
+                <div class="column-2"><span id="document_ka_registration_date">${ docAttributes.ka_registration_date }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Номенклатура:</div>
+                <div class="column-2">${ docAttributes.ka_file_number?.ka_number } ${ docAttributes.ka_file_number?.ka_description }</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Филиал:</div>
+                <div class="column-2">${ docAttributes.ka_filial?.object_name }</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Дата рассмотрения:</div>
+                <div class="column-2">${ docAttributes.ka_due_date }</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Создатель:</div>
+                <div class="column-2">${ docAttributes.owner_name?.ka_surname } ${ docAttributes.owner_name?.ka_firstname } ${ docAttributes.owner_name?.ka_middlename } (${ docAttributes.owner_name?.user_name })</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Дата создания:</div>
+                <div class="column-2">${ docAttributes.r_creation_date }</div>
+            </div>
+            <div class="columns">
+                <div class="column-1">ACL:</div>
+                <div class="column-2">
+                    <span id="document_acl_name">${ docAttributes.acl_name }</span>
+                    <div id="btn_copy_aclname">
+                        <a><span class="btn-copy"></span>Copy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Lifecycle:</div>
+                <div class="column-2">
+                    <span>${ docAttributes.r_policy_id?.object_name } (state: <span id="document_r_current_state">${ docAttributes.r_current_state }</span>)</span>
+                    <div >
+                        <a id="r_current_state_edit_link"><span class="btn-edit"></span>Edit</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Состояние:</div>
+                <div class="column-2">
+                    <span id="document_ka_state_name_ru">${ docAttributes.ka_state_name_ru }</span>
+                    <div >
+                        <a id="ka_state_name_ru_edit_link"><span class="btn-edit"></span>Edit</a>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1">Исполнитель:</div>
+                <div class="column-2">
+                    <ul class="ul-vertical-list">
+                         <!--for key, values in docAttributes.ka_person_performer.iteritems-->
+                        #{list docAttributes.get('ka_person_performer'), as:'values'}
+                          <li>${ values?.getValue()?.ka_surname } ${ values?.getValue()?.ka_firstname } ${ values?.getValue()?.ka_middlename } (${ values?.getValue()?.user_name })</li>
+                        #{/list}
+                    </ul>
+                </div>
+            </div>
+            #{if docAttributes.isCheckedOut }
+                <div class="columns">
+                    <div class="column-1 lock-section"><span>Locked:</span></div>
+                    <div class="column-2 lock-section">
+                        <span>${ docAttributes.r_lock_owner } ${ docAttributes.r_lock_date }</span>
+                        <div>
+                            <a id="cancel_checkout_button"><span class="btn-unlock"></span>Unlock</a>
+                        </div>
+                    </div>
+                </div>
+            #{/if}
+            #{if docAttributes.r_object_type in docAttributes.doctypes_with_reports__ }
+                <div class="columns">
+                    <div class="column-1">Документ-родитель:</div>
+                    <div class="column-2"><a href="/docadmin/view/${ docAttributes.ka_document }" >${ docAttributes.ka_document }</a></div>
+                </div>
+            #{/if}
+
+            <div id="object_name_edit_dialog" title="Название документа">
+                <form id='form_object_name'>
+                    <input id='input_form_object_name' type="text" value="${ docAttributes.object_name }"/>
+                </form>
+            </div>
+            <div id="ka_registration_number_edit_dialog" title="Регистрационный номер">
+                <form id='form_ka_registration_number'>
+                    <input id='input_form_ka_registration_number' type="text" value="${ docAttributes.ka_registration_number}" />
+                </form>
+            </div>
+            <div id="ka_state_name_ru_edit_dialog" title="Состояние">
+                <form id='form_ka_state_name_ru'>
+                    <input id='input_form_ka_state_name_ru' type="text" value="${ docAttributes.ka_state_name_ru}" />
+                </form>
+            </div>
+            <div id="r_current_state_edit_dialog" title="Текущее состояние">
+                <form id='form_r_current_state'>
+                    <input id='input_form_r_current_state' type="text" value="${ docAttributes.r_current_state }" />
+                </form>
+            </div>
+        
+        </div>
+    </div>
+</body>
+</html>
+

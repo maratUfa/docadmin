@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    #{stylesheet 'jquery-ui-1.8.17.custom.css' /}
+    #{stylesheet 'documents.css' /}
+    #{script 'jquery-1.7.1.min.js' /}
+    #{script 'jquery-ui-1.8.17.custom.min.js' /}
+    #{script 'zclip/jquery.zclip.min.js' /}
+    
+    <title>User ${ userData.r_object_id } ${ userData.user_name } ${ userData.ka_full_name }</title>
+
+    <style type="text/css">
+        body {
+            /*background: white url("images/ui-bg_fine-grain_15_ffffff_60x60.png") 50% 50% repeat;*/
+            background-color: #dadada;
+        }
+
+        div#user-tabs {
+            margin: 30px 30px 30px 30px;
+        }
+
+        .column-1{
+            width: 15%;
+        }
+
+        .column-2{
+            width: 80%;
+        }
+
+        div.editable > div{
+            margin-left: 5px;
+        }
+
+        div.selectable > button{
+            margin-left: 5px;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+        $(function(){
+            $("#user-tabs").tabs({
+                ajaxOptions:{
+                    error: function( xhr, status, index, anchor ) {
+                        $( anchor.hash ).html(
+                            "Не возможно загрузить вкладку");
+                    },
+                    cache: false
+                }
+            });
+
+            $('ul.ui-tabs-nav').append(
+                    $('<li class="ui-state-default ui-corner-top" style="float: right;"><a href="@{ Application.index() }">Поиск</a></li>')
+                            .hover(
+                                function(){
+                                    $(this).addClass("ui-state-hover");
+                                },
+                                function(){
+                                    $(this).removeClass("ui-state-hover");
+                                }
+                            )
+            );
+            
+            $("div.editable").each(function(){
+                var attrName = $(this).attr("attrname");
+                var attrValue = $(this).find("span").html();
+                $(this).append($("<div><a><span class='btn-edit'></span>Edit</a></div>"));
+
+
+                $("body").append("<div id='edit-dialog-" + attrName + "' title=''>" +
+                        "<form id='form-edit'>" +
+                        "<input id='form-edit-input' style='width: 300px;' type='text' value='" + attrValue + "'/>" +
+                        "</form></div");
+
+                $('#edit-dialog-' + attrName).dialog({
+                    open: function(event, ui){
+                        var val = $("div.editable[attrname='" + attrName + "'] > span").text();
+                        $(this).find("input#form-edit-input").val(val);
+                    },
+                    autoOpen: false,
+                    width: 400,
+                    buttons: {
+                        "Ok": function() {
+                            var text = $(this).find("input#form-edit-input").val();
+                            var data = new Object                                    ;
+                            data[attrName] = text;
+                            var type = $("div.editable[attrname='" + attrName + "']").attr("objectType");
+                            var id = $("div.editable[attrname='" + attrName + "']").attr("objectId");
+                            var update = #{jsAction @Application.updateAttribute(':type', ':id') /};
+                            $.ajax({
+                                url: update({type: type, id: id}),
+                                type: "POST",
+                                data: data,
+                                success: function(data){
+                                    $("div.editable[attrname='" + attrName + "'] > span").text(data[attrName]);
+                                    $('#edit-dialog-' + attrName).dialog("close");
+                                }
+
+                            });
+                        },
+                        "Cancel": function() {
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+
+                $(this).find(".btn-edit").parent().button({icons:{primary:"ui-icon-pencil"}});
+                $(this).find(".btn-edit").parent().click(function(){
+                    $('#edit-dialog-' + attrName).dialog('open');
+                    return false;
+                });
+            });
+
+            $("div.selectable").each(function(){
+                $(this).append($("<button class='btn-selectable'>Select</button>"));
+                $(".btn-selectable").button({icons:{primary:"ui-icon-link"}});
+                var attrName = $(this).attr("attrname");
+                var attrValue = $(this).find("span").html();
+                if(attrName == undefined){
+                    return false;
+                }
+
+                var element = "<div id='dialog-select-" + attrName + "'>" +
+                        "<div class='dialog-select-filter'>" +
+                        "<input type='text' value='" + attrValue + "' name='dialog-select-filter-value' />" +
+                        "<button class='btn-filter-search'>Search</button>" +
+                        "</div><hr />" +
+                        "<div class='dialog-select-values'>" +
+                        "<ol class='dialog-select-values-list'>" +
+                        "</ol></div></div>";
+
+                $("body").append(element);
+
+                $("#dialog-select-" + attrName).dialog({
+                    autoOpen: false,
+                    width: 300,
+                    buttons: {
+                        "Выбрать":function(){
+                            $(this).dialog("close");
+                        },
+                        "Закрыть":function(){
+                            $(this).dialog("close");
+                        }
+                    }
+                });
+
+                $(this).children(".btn-selectable").click(function(){
+                    $("#dialog-select-" + attrName).dialog("open");
+                });
+
+            });
+
+
+
+
+            
+        });
+    </script>
+</head>
+<body>
+    <div id="user-tabs">
+        <ul>
+            <li><a href="#user-basic">Основное</a></li>
+            <li><a href="@{ Users.userTasks(userData.r_object_id)}">Задачи</a></li>
+            <li><a href="docadmin/ajax/user-inbox/{{ userData.r_object_id }}">Личный ящик</a></li>
+            <li><a href="@{ Users.userGroups(userData.r_object_id)}">Группы</a></li>
+            <li><a href="docadmin/ajax/user-groups/{{ userData.r_object_id }}">Замещения</a></li>
+        </ul>
+        <div id="user-basic">
+            <div class="columns">
+                <div class="column-1"><span>Идентификатор:</span></div>
+                <div class="column-2"><span>${ userData.r_object_id }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Состояние:</span></div>
+                <div class="column-2">
+                    <span>
+                        #{if userData.user_state == 0 }
+                            Активный
+                        #{/if}
+                        #{if userData.user_state == 1 }
+                            Неактивный
+                        #{/if}
+                        #{if userData.user_state == 2 }
+                            Заблокированный
+                        #{/if}
+                        #{if userData.user_state == 3 }
+                            Заблокированный и неактивный
+                        #{/if}
+                        #{if userData.user_state > 3 }
+                            Неопределенный
+                        #{/if}                                                
+                    </span>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Фамилия:</span></div>
+                <div class="column-2 editable" attrname="ka_surname" objectType="kc_user" objectId="${userData.r_object_id}"><span>${ userData.ka_surname }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Имя:</span></div>
+                <div class="column-2 editable" attrname="ka_firstname" objectType="kc_user" objectId="${userData.r_object_id}"><span>${ userData.ka_firstname }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Отчество:</span></div>
+                <div class="column-2 editable" attrname="ka_middlename" objectType="kc_user" objectId="${userData.r_object_id}"><span>${ userData.ka_middlename }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Должность:</span></div>
+                <div class="column-2 selectable" attrname="ka_position_id" objectType="kc_org_position"><span>${ positionData.object_name }</span></div>
+            </div>
+            #{list folderPath, as: 'folder'}
+                #{if folder_isFirst}
+                    <div class="columns">
+                        <div class="column-1"><span>Отдел:</span></div>
+                        <div class="column-2 selectable" attrname="ka_folder_id" objectType="kc_org_position"><span>${ folder.object_name }</span></div>
+                    </div>
+                #{/if}
+                #{if folder_isLast}
+                    <div class="columns">
+                        <div class="column-1"><span>Филиал:</span></div>
+                        <div class="column-2 selectable" attrname="ka_department" objectType="kc_user"><span>${ folder.object_name }</span></div>
+                    </div>
+                #{/if}
+            #{/list}
+
+            <div class="columns">
+                <div class="column-1"><span>Email:</span></div>
+                <div class="column-2 editable" attrname="user_address" objectType="kc_user"><span>${ userData.user_address }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Логин:</span></div>
+                <div class="column-2"><span>${ userData.user_name }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Домен логина:</span></div>
+                <div class="column-2"><span>${ userData.user_login_domain }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span>Авторизация:</span></div>
+                <div class="column-2"><span>${ userData.user_source }</span></div>
+            </div>
+            <div class="columns">
+                <div class="column-1"><span></span></div>
+                <div class="column-2"><span></span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
